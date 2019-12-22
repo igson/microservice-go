@@ -1,45 +1,37 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"github.com/igson/microservice-go/mvc/service"
 	"github.com/igson/microservice-go/mvc/utils"
 )
 
 //BuscarUsuario - método de busca do usuário por id.
-func BuscarUsuario(resp http.ResponseWriter, req *http.Request) {
+func BuscarUsuario(ctx *gin.Context) {
 
-	usuarioID, error := strconv.ParseInt(req.URL.Query().Get("usuarioId"), 10, 64)
+	usuarioID, error := strconv.ParseInt(ctx.Param("userId"), 10, 64)
 
 	if error != nil {
-
 		msgErro := &utils.ErrorMessage{
 			Mensagem:   fmt.Sprintf("O campo id deve ser númerico."),
 			StatusCode: http.StatusNotFound,
 			Codigo:     "erro_conversão_dados",
 		}
-
-		jsonMsgErro, _ := json.Marshal(msgErro)
-		resp.WriteHeader(msgErro.StatusCode)
-		resp.Write(jsonMsgErro)
+		utils.ResponseError(ctx, msgErro)
 		return
 	}
 
-	usuario, msgErro := service.BuscarUsuario(usuarioID)
+	usuarioEncontrado, msgErro := service.BuscarUsuario(usuarioID)
 
 	if msgErro != nil {
-		jsonMsgErro, _ := json.Marshal(msgErro)
-		resp.WriteHeader(msgErro.StatusCode)
-		resp.Write([]byte(jsonMsgErro))
+		utils.ResponseError(ctx, msgErro)
 		return
 	}
 
-	jsonUsuario, _ := json.Marshal(usuario)
-
-	resp.Write(jsonUsuario)
+	utils.Response(ctx, http.StatusOK, usuarioEncontrado)
 
 }

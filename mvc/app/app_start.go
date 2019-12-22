@@ -1,17 +1,23 @@
 package app
 
 import (
-	"net/http"
-
-	"github.com/igson/microservice-go/mvc/controller"
+	"github.com/gin-gonic/gin"
 )
+
+var (
+	rota *gin.Engine
+)
+
+func init() {
+	rota = gin.Default()
+}
 
 //StartApp inicia a execução da aplicação
 func StartApp() {
 
-	http.HandleFunc("/usuarios", controller.BuscarUsuario)
+	mapUrls()
 
-	if error := http.ListenAndServe(":8080", nil); error != nil {
+	if error := rota.Run(":8080"); error != nil {
 		panic(error)
 	}
 
